@@ -14,42 +14,156 @@ Loading state while fetching
 
 **/
 let docElements = {
+    currentWeatherDisplay: document.getElementById('current-weather-div'),
+    inputDiv: document.getElementById('input-div'),
     searchButton: document.getElementById('search-button'),
-    currentLocationButton: document.getElementById('currentlocation-button'),
-    currentName: document.getElementById('current-name'),
-    currentTemp: document.getElementById('current-temp'),
-    currentFeelsLike: document.getElementById('current-feels-like'),
-    currentHumidity: document.getElementById('current-humidity'),
-    currentWindSpeed: document.getElementById('current-windspeed'),
-    currentIcon: document.getElementById('current-weather-icon'),
-    currentCondition: document.getElementById('current-weather-condition'),
-    forecastsContainer: document.getElementById('forecasts')
+    searchInput: document.getElementById('search-input'),
+    forecastsContainer: document.getElementById('forecasts'),
+    forecastDetailsTemplate: [
+        'Date: ',
+        'Temperature: ',
+        'Humidity: ',
+        'Weather Condition: ',
+        'date',
+        'temp',
+        'humidity',
+        'condition'],
+    weatherDetailsTemplate: [
+        'Date: ',
+        "City Name: ",
+        'Temperature: ',
+        'Feels Like: ',
+        "Humidity: ",
+        "Wind Speed: ",
+        "Weather Condition: ",
+        'date',
+        'name',
+        'temp',
+        'feels-like',
+        'humidity',
+        'windspeed',
+        'condition'],
+    warning: document.createElement('h5')
+}
+docElements.searchButton.addEventListener('click', loadCityInfo)
+docElements.warning.setAttribute('id', 'warning')
+let weatherPromise, weatherResponse;
+
+
+function updateWeather(currentWeather) {
+    let currentWeatherDetails = [currentWeather.location.localtime.substring(0, 11),
+    currentWeather.location.name + ', ' + currentWeather.location.country,
+    currentWeather.current.temp_c + '℃',
+    currentWeather.current.feelslike_c + '℃',
+    currentWeather.current.humidity + "%",
+    currentWeather.current.wind_kph + " km/h",
+    currentWeather.current.condition.text
+    ]
+    for (i = 0; i < 7; i++) {
+        docElements.currentWeatherDisplay.children[i].innerText += ` ${currentWeatherDetails[i]}`
+    }
+    let currentWeatherIcon = document.createElement('img')
+    currentWeatherIcon.setAttribute('src', `${currentWeather.current.condition.icon}`)
+    currentWeatherIcon.setAttribute('id', 'current-weather-icon')
+    docElements.currentWeatherDisplay.appendChild(currentWeatherIcon)
 }
 
-async function loadDefault() {
-    try {
-        let defaultWeatherPromise = await fetch('http://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=Karachi&days=4&aqi=no&alerts=no')
-        docElements.defaultWeather = await defaultWeatherPromise.json()
-        console.log(docElements.defaultWeather)
-        docElements.currentName.innerText += ` ${docElements.defaultWeather.location.name}, ${docElements.defaultWeather.location.country}`
-        docElements.currentTemp.innerText += ` ${docElements.defaultWeather.current.temp_c}℃`
-        docElements.currentFeelsLike.innerText += ` ${docElements.defaultWeather.current.feelslike_c}℃`
-        docElements.currentHumidity.innerText += ` ${docElements.defaultWeather.current.humidity}%`
-        docElements.currentWindSpeed.innerText += ` ${docElements.defaultWeather.current.wind_kph} km/h`
-        docElements.currentIcon.setAttribute('src', `${docElements.defaultWeather.current.condition.icon}`)
-        docElements.currentCondition.innerText += ` ${docElements.defaultWeather.current.condition.text}`
-        
-    } catch (error) {
-        console.log(error)
+function updateForecasts(currentForecasts) {
+    let forecastCurrentDiv, currentForecast, forecastIcon, currentForecastDetails;
+    for (i = 0; i < 4; i++) {
+        currentForecast = currentForecasts.forecastday[i + 1]
+        currentForecastDetails = [currentForecast.date,
+        currentForecast.day.avgtemp_c + '℃',
+        currentForecast.day.avghumidity + "%",
+        currentForecast.day.condition.text,
+        ]
+        forecastCurrentDiv = docElements.forecastsContainer.children[i]
+        for (j = 0; j < 4; j++) {
+            forecastCurrentDiv.children[j].innerText += ` ${currentForecastDetails[j]}`
+        }
+        forecastIcon = document.createElement('img')
+        forecastIcon.setAttribute('src', `${currentForecast.day.condition.icon}`)
+        forecastIcon.setAttribute('class', 'current-forecast-icon')
+        forecastCurrentDiv.appendChild(forecastIcon)
     }
 }
-loadDefault()
 
-for (i = 0; i < 4; i++) {
-    let forecastDiv = document.createElement('div')
-    forecastDiv.setAttribute('id', `forecast${i}`)
-    docElements.forecastsContainer.appendChild(forecastDiv)
+function loadWeatherDisplay() {
+    docElements.currentWeatherDisplay.innerHTML = ''
+    let newCurrentElement;
+    for (i = 0; i < (docElements.weatherDetailsTemplate.length - 7); i++) {
+        newCurrentElement = document.createElement('h4')
+        newCurrentElement.setAttribute('id', `current-${docElements.forecastDetailsTemplate[i - 7]}`)
+        newCurrentElement.innerText = docElements.weatherDetailsTemplate[i]
+        docElements.currentWeatherDisplay.appendChild(newCurrentElement)
+    }
 }
 
+function loadForecastDisplay() {
+    docElements.forecastsContainer.innerHTML = ''
+    for (i = 0; i < 4; i++) {
+        let forecastDiv = document.createElement('div')
+        forecastDiv.setAttribute('id', `forecast${i}`)
+        docElements.forecastsContainer.appendChild(forecastDiv)
+        let newElement;
+        for (j = 0; j < (docElements.forecastDetailsTemplate.length - 4); j++) {
+            newElement = document.createElement('h5')
+            newElement.setAttribute('id', `forecast-${i}-${docElements.forecastDetailsTemplate[j + 4]}`)
+            newElement.style.margin = '0.5rem'
+            newElement.innerText = docElements.forecastDetailsTemplate[j]
+            forecastDiv.appendChild(newElement)
+        }
+    }
+}
+
+async function loadScreen(city) {
+    try {
+        weatherPromise = await fetch(`http://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=${city}&days=5&aqi=no&alerts=no`)
+        if (!weatherPromise.ok) {
+            throw weatherPromise
+        } else {
+            weatherResponse = await weatherPromise.json()
+        }
+        console.log(city + ": ")
+        console.log(weatherResponse)
+        docElements.weather = weatherResponse
+        loadWeatherDisplay()
+        loadForecastDisplay()
+        updateWeather(docElements.weather)
+        updateForecasts(docElements.weather.forecast)
+    } catch (error) {
+        docElements.warning.innerText = 'Please enter a valid city name.'
+        docElements.inputDiv.appendChild(docElements.warning)
+    }
+}
+loadScreen('Karachi')
+
+/**                
+ * http://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=London&days=1&aqi=no&alerts=no
+ * http://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=Karachi&days=1&aqi=no&alerts=no
+ * 
+ * date: currentForecast.date,
+                    temp: currentForecast.day.avgtemp_c,
+                        humidity: currentForecast.day.avghumidity,
+                            windspeed: (currentForecast.maxwind_kph + currentForecast.day.minwind_kph) / 2,
+                                icon: currentForecast.day.condition.icon,
+                                    condition: currentForecast.day.condition.text
+                                    */
+
+
+function loadCityInfo() {
+    if (docElements.inputDiv.contains(docElements.warning)) {
+    docElements.inputDiv.removeChild(docElements.warning)
+    }
+    cityName = docElements.searchInput.value
+    if (cityName === '') {
+        docElements.warning.innerText = 'Please enter a city name.'
+        docElements.inputDiv.appendChild(warning)
+    } else {
+        docElements.searchInput.value = ''
+        loadScreen(cityName)
+
+    }
+}
 
 
