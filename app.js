@@ -14,6 +14,8 @@ Loading state while fetching
 
 **/
 let docElements = {
+    weatherLoader: document.createElement('div'),
+    forecastsLoader: document.createElement('div'),
     currentWeatherDisplay: document.getElementById('current-weather-div'),
     inputDiv: document.getElementById('input-div'),
     searchButton: document.getElementById('search-button'),
@@ -46,6 +48,8 @@ let docElements = {
     warning: document.createElement('h5')
 }
 docElements.searchButton.addEventListener('click', loadCityInfo)
+docElements.weatherLoader.setAttribute('class', 'spinner')
+docElements.forecastsLoader.setAttribute('class', 'spinner')
 docElements.warning.setAttribute('id', 'warning')
 let weatherPromise, weatherResponse;
 
@@ -93,7 +97,7 @@ function loadWeatherDisplay() {
     let newCurrentElement;
     for (i = 0; i < (docElements.weatherDetailsTemplate.length - 7); i++) {
         newCurrentElement = document.createElement('h4')
-        newCurrentElement.setAttribute('id', `current-${docElements.forecastDetailsTemplate[i - 7]}`)
+        newCurrentElement.setAttribute('id', `current-${docElements.weatherDetailsTemplate[i + 7]}`)
         newCurrentElement.innerText = docElements.weatherDetailsTemplate[i]
         docElements.currentWeatherDisplay.appendChild(newCurrentElement)
     }
@@ -104,6 +108,7 @@ function loadForecastDisplay() {
     for (i = 0; i < 4; i++) {
         let forecastDiv = document.createElement('div')
         forecastDiv.setAttribute('id', `forecast${i}`)
+        forecastDiv.setAttribute('class', 'forecast-div')
         docElements.forecastsContainer.appendChild(forecastDiv)
         let newElement;
         for (j = 0; j < (docElements.forecastDetailsTemplate.length - 4); j++) {
@@ -118,11 +123,16 @@ function loadForecastDisplay() {
 
 async function loadScreen(city) {
     try {
+        docElements.currentWeatherDisplay.innerHTML = ''
+        docElements.forecastsContainer.innerHTML = ''
+        docElements.currentWeatherDisplay.appendChild(docElements.weatherLoader)
+        docElements.forecastsContainer.appendChild(docElements.forecastsLoader)
         weatherPromise = await fetch(`http://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=${city}&days=5&aqi=no&alerts=no`)
         if (!weatherPromise.ok) {
             throw weatherPromise
         } else {
             weatherResponse = await weatherPromise.json()
+
         }
         console.log(city + ": ")
         console.log(weatherResponse)
@@ -153,12 +163,12 @@ loadScreen('Karachi')
 
 function loadCityInfo() {
     if (docElements.inputDiv.contains(docElements.warning)) {
-    docElements.inputDiv.removeChild(docElements.warning)
+        docElements.inputDiv.removeChild(docElements.warning)
     }
     cityName = docElements.searchInput.value
     if (cityName === '') {
         docElements.warning.innerText = 'Please enter a city name.'
-        docElements.inputDiv.appendChild(warning)
+        docElements.inputDiv.appendChild(docElements.warning)
     } else {
         docElements.searchInput.value = ''
         loadScreen(cityName)

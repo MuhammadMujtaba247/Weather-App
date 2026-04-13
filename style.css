@@ -33,8 +33,8 @@ main {
     background-color: lightseagreen;
     border-radius: 1.5em;
     height: max-content;
-    padding-bottom: 2rem;
     margin: 1.5rem;
+    padding-bottom: 2rem;
 }
 
 button {
@@ -81,6 +81,7 @@ hr {
     border-radius: 1.5em;
     margin: 1.5rem;
     min-height: max-content;
+    padding-bottom: 2rem;
 }
 
 #current-weather-div {
@@ -92,7 +93,6 @@ hr {
     flex-wrap: wrap;
     flex-direction: column;
     justify-content: space-evenly;
-    align-content:flex-start;
     position: relative;
     border-radius: 2rem;
     overflow: hidden;
@@ -105,10 +105,10 @@ hr {
     justify-content: space-evenly;
 }
 
-#forecasts>div {
+.forecast-div {
     background-color: rgb(20, 138, 71);
     width: 22%;
-    height: 13rem;
+    min-height: 13rem;
 }
 
 h2 {
@@ -117,19 +117,19 @@ h2 {
 }
 
 #current-weather-div>h4 {
-    margin: 0.4rem 1rem;
+    margin: 0.35rem 1rem;
     z-index: 2;
     color: black;
-    width: 17rem;
+    width: 15rem;
+    align-self: flex-start;
 }
 
 #current-weather-icon {
     height: 7rem;
     width: 7rem;
     margin: 0;
-    position: absolute;
-    right: 2rem;
-    top: 1rem;
+    padding-bottom: 1rem;
+
 }
 .current-forecast-icon {
     margin-left: 3rem;
@@ -141,4 +141,26 @@ h2 {
 #warning {
     color: red;
     font-weight:900;
+    margin-bottom: 0;
+}
+
+.spinner {
+    background-color: transparent;
+    width: 3rem;
+    height: 3rem;
+    border: 0.5rem solid rgb(20, 138, 71);
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    animation: loading 0.75s linear infinite;
+    align-self: center;
+    justify-self: center;
+}
+@keyframes loading {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+    
 }
