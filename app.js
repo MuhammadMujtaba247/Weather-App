@@ -1,19 +1,23 @@
 /** Core features required:
 
-Search by city name
-Display current temperature, feels like, humidity, wind speed, weather condition
-Weather icon matching the condition
-Toggle between Celsius and Fahrenheit
-Error handling for invalid city names
+Search by city name .
+Display current temperature, feels like, humidity, wind speed, weather condition .
+Weather icon matching the condition .
+Toggle between Celsius and Fahrenheit ?
+Error handling for invalid city names .
+
+
 Features that make it portfolio worthy:
 
 Recent searches saved to localStorage — last 5 cities
 Clean responsive design — works on mobile
 Background or color scheme changes based on weather condition — sunny looks different from rainy
-Loading state while fetching
+Loading state while fetching .
 
 **/
 let docElements = {
+    pastSearchesDisplay: document.getElementById('past-searches'),
+    pastSearches: JSON.parse(localStorage.getItem('Past Searches')),
     weatherLoader: document.createElement('div'),
     forecastsLoader: document.createElement('div'),
     currentWeatherDisplay: document.getElementById('current-weather-div'),
@@ -129,10 +133,26 @@ async function loadScreen(city) {
         docElements.forecastsContainer.appendChild(docElements.forecastsLoader)
         weatherPromise = await fetch(`http://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=${city}&days=5&aqi=no&alerts=no`)
         if (!weatherPromise.ok) {
+            console.log(weatherPromise.status)
             throw weatherPromise
         } else {
             weatherResponse = await weatherPromise.json()
-
+            if (docElements.pastSearches.includes(city)) {
+                i = docElements.pastSearches.indexOf(city)
+                docElements.pastSearches.splice(i, 1)
+            }
+            docElements.pastSearches.unshift(city)
+            if (docElements.pastSearches.length > 5) {
+                docElements.pastSearches = docElements.pastSearches.slice(0, 5)
+            }
+            console.log(docElements.pastSearches)
+            docElements.pastSearchesDisplay.innerHTML = ''
+            for (i = 0; i < docElements.pastSearches.length; i++) {
+                let pastSearch = document.createElement('option')
+                pastSearch.setAttribute('value', docElements.pastSearches[i])
+                docElements.pastSearchesDisplay.appendChild(pastSearch)
+            }
+            localStorage.setItem('Past Searches', JSON.stringify(docElements.pastSearches))
         }
         console.log(city + ": ")
         console.log(weatherResponse)
@@ -141,25 +161,14 @@ async function loadScreen(city) {
         loadForecastDisplay()
         updateWeather(docElements.weather)
         updateForecasts(docElements.weather.forecast)
+
     } catch (error) {
+        console.log(error)
         docElements.warning.innerText = 'Please enter a valid city name.'
         docElements.inputDiv.appendChild(docElements.warning)
     }
 }
 loadScreen('Karachi')
-
-/**                
- * http://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=London&days=1&aqi=no&alerts=no
- * http://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=Karachi&days=1&aqi=no&alerts=no
- * 
- * date: currentForecast.date,
-                    temp: currentForecast.day.avgtemp_c,
-                        humidity: currentForecast.day.avghumidity,
-                            windspeed: (currentForecast.maxwind_kph + currentForecast.day.minwind_kph) / 2,
-                                icon: currentForecast.day.condition.icon,
-                                    condition: currentForecast.day.condition.text
-                                    */
-
 
 function loadCityInfo() {
     if (docElements.inputDiv.contains(docElements.warning)) {
