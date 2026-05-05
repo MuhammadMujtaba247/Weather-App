@@ -131,7 +131,7 @@ async function loadScreen(city) {
         docElements.forecastsContainer.innerHTML = ''
         docElements.currentWeatherDisplay.appendChild(docElements.weatherLoader)
         docElements.forecastsContainer.appendChild(docElements.forecastsLoader)
-        weatherPromise = await fetch(`http://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=${city}&days=5&aqi=no&alerts=no`)
+        weatherPromise = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=${city}&days=5&aqi=no&alerts=no`)
         if (!weatherPromise.ok) {
             console.log(weatherPromise.status)
             throw weatherPromise
