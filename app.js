@@ -17,7 +17,7 @@ Loading state while fetching .
 **/
 let docElements = {
     pastSearchesDisplay: document.getElementById('past-searches'),
-    pastSearches: JSON.parse(localStorage.getItem('Past Searches')),
+    pastSearches: JSON.parse(localStorage.getItem('Past Searches')) || [],
     weatherLoader: document.createElement('div'),
     forecastsLoader: document.createElement('div'),
     currentWeatherDisplay: document.getElementById('current-weather-div'),
