@@ -107,8 +107,9 @@ hr {
 
 .forecast-div {
     background-color: rgb(20, 138, 71);
-    width: 22%;
+    width: 40%;
     min-height: 13rem;
+    font-size: larger;
 }
 
 h2 {
@@ -132,10 +133,10 @@ h2 {
 
 }
 .current-forecast-icon {
-    margin-left: 3rem;
+    align-self: center;
     margin-top: 0;
-    height: 5rem;
-    width: 5rem;
+    height: 6rem;
+    width: 6rem;
 }
 
 #warning {

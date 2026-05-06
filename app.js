@@ -78,7 +78,7 @@ function updateWeather(currentWeather) {
 
 function updateForecasts(currentForecasts) {
     let forecastCurrentDiv, currentForecast, forecastIcon, currentForecastDetails;
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < currentForecasts.forecastday.length - 1; i++) {
         currentForecast = currentForecasts.forecastday[i + 1]
         currentForecastDetails = [currentForecast.date,
         currentForecast.day.avgtemp_c + '℃',
@@ -107,9 +107,9 @@ function loadWeatherDisplay() {
     }
 }
 
-function loadForecastDisplay() {
+function loadForecastDisplay(currentForecasts) {
     docElements.forecastsContainer.innerHTML = ''
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < currentForecasts.forecastday.length - 1; i++) {
         let forecastDiv = document.createElement('div')
         forecastDiv.setAttribute('id', `forecast${i}`)
         forecastDiv.setAttribute('class', 'forecast-div')
@@ -131,7 +131,7 @@ async function loadScreen(city) {
         docElements.forecastsContainer.innerHTML = ''
         docElements.currentWeatherDisplay.appendChild(docElements.weatherLoader)
         docElements.forecastsContainer.appendChild(docElements.forecastsLoader)
-        weatherPromise = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=${city}&days=5&aqi=no&alerts=no`)
+        weatherPromise = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=344c9a24f7a546608ee164936260904&q=${city}&days=3&aqi=no&alerts=no`)
         if (!weatherPromise.ok) {
             console.log(weatherPromise.status)
             throw weatherPromise
@@ -145,7 +145,6 @@ async function loadScreen(city) {
             if (docElements.pastSearches.length > 5) {
                 docElements.pastSearches = docElements.pastSearches.slice(0, 5)
             }
-            console.log(docElements.pastSearches)
             docElements.pastSearchesDisplay.innerHTML = ''
             for (i = 0; i < docElements.pastSearches.length; i++) {
                 let pastSearch = document.createElement('option')
@@ -158,8 +157,9 @@ async function loadScreen(city) {
         console.log(weatherResponse)
         docElements.weather = weatherResponse
         loadWeatherDisplay()
-        loadForecastDisplay()
+        loadForecastDisplay(docElements.weather.forecast)
         updateWeather(docElements.weather)
+        console.log(docElements.weather.forecast)
         updateForecasts(docElements.weather.forecast)
 
     } catch (error) {
